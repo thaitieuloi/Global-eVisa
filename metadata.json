@@ -1,0 +1,5 @@
+{
+  "name": "Global eVisa System",
+  "description": "A technical architecture for visa pricing and eligibility lookup",
+  "requestFramePermissions": []
+}

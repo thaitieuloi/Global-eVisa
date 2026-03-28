@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Google AI Studio App</title>
+    <script>
+      // Fix for "Cannot set property fetch of #<Window> which has only a getter"
+      // This happens when a library tries to polyfill fetch in an environment where it's read-only.
+      (function() {
+        try {
+          const originalFetch = window.fetch;
+          if (originalFetch) {
+            const descriptor = {
+              get: function() { return originalFetch; },
+              set: function(v) { 
+                console.warn('Attempted to overwrite fetch, ignoring to prevent TypeError.');
+              },
+              configurable: true,
+              enumerable: true
+            };
+            Object.defineProperty(window, 'fetch', descriptor);
+            if (typeof globalThis !== 'undefined') {
+              Object.defineProperty(globalThis, 'fetch', descriptor);
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to patch fetch:', e);
+        }
+        
+        // Polyfill global and process for Node-specific libraries
+        window.global = window;
+        window.process = { env: {} };
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
