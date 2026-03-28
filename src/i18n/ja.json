@@ -14,7 +14,8 @@
     "status": "ステータス",
     "date": "日付",
     "actions": "アクション",
-    "copy": "JSONをコピー",
+    "copy": "コピー",
+    "copy_json": "JSONをコピー",
     "copied": "コピーしました！",
     "register": "申請を登録"
   },
@@ -63,7 +64,8 @@
     "extracting": "抽出中...",
     "pending": "スキャン待ち...",
     "success_title": "申請が登録されました！",
-    "success_desc": "ビザ申請が正常に送信されました。チームがまもなく処理を開始します。"
+    "success_desc": "ビザ申請が正常に送信されました。チームがまもなく処理を開始します。",
+    "json_output": "JSON 出力"
   },
   "admin": {
     "dashboard": "管理者ダッシュボード",

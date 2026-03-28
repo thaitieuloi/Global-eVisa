@@ -14,7 +14,8 @@
     "status": "Status",
     "date": "Date",
     "actions": "Actions",
-    "copy": "Copy JSON",
+    "copy": "Copy",
+    "copy_json": "Copy JSON",
     "copied": "Copied!",
     "register": "REGISTER APPLICATION"
   },
@@ -63,7 +64,8 @@
     "extracting": "Extracting...",
     "pending": "Pending scan...",
     "success_title": "Application Registered!",
-    "success_desc": "Your visa application has been successfully submitted. Our team will process it shortly."
+    "success_desc": "Your visa application has been successfully submitted. Our team will process it shortly.",
+    "json_output": "JSON Output"
   },
   "admin": {
     "dashboard": "Admin Dashboard",

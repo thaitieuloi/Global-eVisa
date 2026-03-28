@@ -297,44 +297,58 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass-card rounded-[2rem] p-6 border border-brand-border bg-brand-surface/20"
+              className="glass-card rounded-[2rem] overflow-hidden border border-brand-border bg-brand-surface/20 shadow-2xl shadow-sky-500/5"
             >
-              <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <h4 className="text-xs font-black uppercase tracking-widest text-brand-muted">{t('ocr.extracted_details')}</h4>
+              <div className="flex justify-between items-center px-6 py-4 border-b border-brand-border/50 bg-brand-surface/40">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
+                  <h4 className="text-xs font-black uppercase tracking-widest text-brand-text">{t('ocr.json_output')}</h4>
                 </div>
                 <button
                   onClick={copyToClipboard}
-                  className="flex items-center gap-2 px-4 py-2 bg-sky-500/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-sky-500 hover:bg-sky-500 hover:text-white transition-all border border-sky-500/20"
+                  className={cn(
+                    "flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border shadow-lg active:scale-95",
+                    copied 
+                      ? "bg-emerald-500 text-white border-emerald-400" 
+                      : "bg-sky-500 text-white border-sky-400 hover:bg-sky-600 hover:shadow-sky-500/30"
+                  )}
                 >
                   {copied ? (
                     <>
-                      <Check className="w-3 h-3" />
+                      <Check className="w-3.5 h-3.5" />
                       {t('common.copied')}
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3 h-3" />
-                      {t('common.copy')}
+                      <Copy className="w-3.5 h-3.5" />
+                      {t('common.copy_json')}
                     </>
                   )}
                 </button>
               </div>
-              <div className="rounded-xl overflow-hidden border border-brand-border/50 shadow-inner">
+              <div className="relative group">
                 <SyntaxHighlighter 
                   language="json" 
                   style={atomDark}
                   customStyle={{
                     margin: 0,
-                    padding: '1.5rem',
-                    fontSize: '11px',
-                    backgroundColor: 'rgba(0,0,0,0.3)',
-                    fontFamily: 'JetBrains Mono, monospace',
+                    padding: '2rem',
+                    fontSize: '13px',
+                    lineHeight: '1.6',
+                    backgroundColor: 'transparent',
+                    fontFamily: '"JetBrains Mono", "Fira Code", monospace',
+                  }}
+                  codeTagProps={{
+                    style: {
+                      fontFamily: 'inherit',
+                    }
                   }}
                 >
                   {JSON.stringify(result, null, 2)}
                 </SyntaxHighlighter>
+                <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <span className="text-[10px] font-bold text-brand-muted/50 uppercase tracking-widest">JSON Format</span>
+                </div>
               </div>
             </motion.div>
           )}

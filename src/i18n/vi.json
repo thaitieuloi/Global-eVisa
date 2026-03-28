@@ -14,7 +14,8 @@
     "status": "Trạng thái",
     "date": "Ngày",
     "actions": "Hành động",
-    "copy": "Sao chép JSON",
+    "copy": "Sao chép",
+    "copy_json": "Sao chép JSON",
     "copied": "Đã sao chép!",
     "register": "ĐĂNG KÝ HỒ SƠ"
   },
@@ -63,7 +64,8 @@
     "extracting": "Đang trích xuất...",
     "pending": "Đang chờ quét...",
     "success_title": "Hồ sơ đã được đăng ký!",
-    "success_desc": "Hồ sơ xin visa của bạn đã được gửi thành công. Đội ngũ của chúng tôi sẽ xử lý sớm."
+    "success_desc": "Hồ sơ xin visa của bạn đã được gửi thành công. Đội ngũ của chúng tôi sẽ xử lý sớm.",
+    "json_output": "Kết quả JSON"
   },
   "admin": {
     "dashboard": "Bảng điều khiển Admin",
