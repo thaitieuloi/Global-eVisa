@@ -95,6 +95,7 @@ CREATE POLICY "Allow public read on visa_eligibilities" ON visa_eligibilities FO
 CREATE POLICY "Allow public read on visa_pricings" ON visa_pricings FOR SELECT USING (true);
 CREATE POLICY "Allow public insert on visa_orders" ON visa_orders FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow public read on visa_orders" ON visa_orders FOR SELECT USING (true);
+CREATE POLICY "Allow public update on visa_orders" ON visa_orders FOR UPDATE USING (true);
 
 -- Sample Data Seeding
 -- Clear existing data

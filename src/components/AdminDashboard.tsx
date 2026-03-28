@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { Lock, LogOut, LayoutDashboard, ListFilter, Search, User, FileText, Calendar, CreditCard, ChevronDown, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { orderService } from '../services/orderService';
 import { Order } from '../types';
 import { cn, formatCurrency } from '../lib/utils';
 
 export default function AdminDashboard() {
+  const { t } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -13,6 +15,10 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [visaTypeFilter, setVisaTypeFilter] = useState<string>('all');
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +48,39 @@ export default function AdminDashboard() {
     setUsername('');
     setPassword('');
     setOrders([]);
+    setSearchQuery('');
+    setStatusFilter('all');
+    setVisaTypeFilter('all');
   };
+
+  const handleStatusUpdate = async (orderId: string, newStatus: Order['status']) => {
+    setUpdatingStatus(orderId);
+    try {
+      await orderService.updateOrderStatus(orderId, newStatus);
+      setOrders(prev => prev.map(order => 
+        order.id === orderId ? { ...order, status: newStatus } : order
+      ));
+    } catch (err) {
+      console.error('Failed to update status:', err);
+      setError('Failed to update order status.');
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = 
+      order.passport_data.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.visa_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.visa_code.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    const matchesVisaType = visaTypeFilter === 'all' || order.visa_code === visaTypeFilter;
+
+    return matchesSearch && matchesStatus && matchesVisaType;
+  });
+
+  const uniqueVisaTypes = Array.from(new Set(orders.map(o => o.visa_code)));
 
   if (!isAuthenticated) {
     return (
@@ -58,46 +96,55 @@ export default function AdminDashboard() {
             <div className="w-16 h-16 bg-sky-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <Lock className="w-8 h-8 text-sky-500" />
             </div>
-            <h2 className="text-3xl font-black text-brand-text mb-2">Admin Login</h2>
-            <p className="text-brand-muted">Enter your credentials to access the dashboard</p>
+            <h2 className="text-3xl font-black text-brand-text mb-2">{t('admin.loginTitle')}</h2>
+            <p className="text-brand-muted">{t('admin.loginSubtitle')}</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6" aria-label="Admin Login Form">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-brand-muted uppercase tracking-widest">Username</label>
+              <label htmlFor="username" className="text-xs font-bold text-brand-muted uppercase tracking-widest">{t('admin.username')}</label>
               <input
+                id="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full bg-brand-surface border border-brand-border rounded-xl px-5 py-4 text-brand-text focus:ring-2 focus:ring-sky-500 outline-none transition-all"
                 placeholder="admin"
                 required
+                aria-required="true"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-brand-muted uppercase tracking-widest">Password</label>
+              <label htmlFor="password" className="text-xs font-bold text-brand-muted uppercase tracking-widest">{t('admin.password')}</label>
               <input
+                id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-brand-surface border border-brand-border rounded-xl px-5 py-4 text-brand-text focus:ring-2 focus:ring-sky-500 outline-none transition-all"
                 placeholder="••••••"
                 required
+                aria-required="true"
               />
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl text-sm font-bold flex items-center gap-2">
-                <AlertCircle className="w-4 h-4" />
+              <div 
+                role="alert"
+                className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl text-sm font-bold flex items-center gap-2"
+              >
+                <AlertCircle className="w-4 h-4" aria-hidden="true" />
                 {error}
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-black py-4 rounded-xl hover:shadow-xl hover:shadow-sky-500/20 transition-all active:scale-[0.98]"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-black py-4 rounded-xl hover:shadow-xl hover:shadow-sky-500/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-busy={loading}
             >
-              LOGIN
+              {loading ? t('admin.loggingIn') : t('admin.loginButton')}
             </button>
           </form>
         </motion.div>
@@ -111,55 +158,106 @@ export default function AdminDashboard() {
         <div>
           <h2 className="text-4xl font-black text-brand-text mb-2 flex items-center gap-3">
             <LayoutDashboard className="w-10 h-10 text-sky-500" />
-            Admin Dashboard
+            {t('admin.dashboardTitle')}
           </h2>
-          <p className="text-brand-muted font-medium">Manage and process visa applications</p>
+          <p className="text-brand-muted font-medium">{t('admin.dashboardSubtitle')}</p>
         </div>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-6 py-3 bg-brand-surface border border-brand-border rounded-xl text-brand-muted font-bold hover:text-red-500 hover:border-red-500/30 transition-all"
+          aria-label="Logout from Admin Dashboard"
+          className="flex items-center gap-2 px-6 py-3 bg-brand-surface border border-brand-border rounded-xl text-brand-muted font-bold hover:text-red-500 hover:border-red-500/30 transition-all focus:ring-2 focus:ring-red-500 outline-none"
         >
-          <LogOut className="w-4 h-4" />
-          Logout
+          <LogOut className="w-4 h-4" aria-hidden="true" />
+          {t('admin.logout')}
         </button>
       </div>
 
       <div className="grid grid-cols-1 gap-8">
         <div className="glass-card rounded-[2.5rem] overflow-hidden">
-          <div className="p-8 border-b border-brand-border bg-brand-surface/30 flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <ListFilter className="w-5 h-5 text-sky-500" />
-              <h3 className="text-xl font-bold text-brand-text">Recent Orders</h3>
+          <div className="p-8 border-b border-brand-border bg-brand-surface/30">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+              <div className="flex items-center gap-3">
+                <ListFilter className="w-5 h-5 text-sky-500" />
+                <h3 className="text-xl font-bold text-brand-text">{t('admin.recentOrders')}</h3>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto" role="search" aria-label="Order filters">
+                <div className="relative flex-1 min-w-[200px]">
+                  <label htmlFor="search-orders" className="sr-only">Search orders by applicant or visa</label>
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" aria-hidden="true" />
+                  <input
+                    id="search-orders"
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t('admin.searchPlaceholder')}
+                    className="w-full bg-brand-surface border border-brand-border rounded-xl pl-11 pr-4 py-2 text-sm text-brand-text focus:ring-2 focus:ring-sky-500 outline-none transition-all"
+                  />
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <label htmlFor="status-filter" className="sr-only">Filter by status</label>
+                  <select
+                    id="status-filter"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="bg-brand-surface border border-brand-border rounded-xl px-4 py-2 text-sm text-brand-text focus:ring-2 focus:ring-sky-500 outline-none transition-all"
+                  >
+                    <option value="all">{t('admin.allStatuses')}</option>
+                    <option value="pending">{t('admin.status.pending')}</option>
+                    <option value="processing">{t('admin.status.processing')}</option>
+                    <option value="completed">{t('admin.status.completed')}</option>
+                    <option value="cancelled">{t('admin.status.cancelled')}</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <label htmlFor="visa-filter" className="sr-only">Filter by visa type</label>
+                  <select
+                    id="visa-filter"
+                    value={visaTypeFilter}
+                    onChange={(e) => setVisaTypeFilter(e.target.value)}
+                    className="bg-brand-surface border border-brand-border rounded-xl px-4 py-2 text-sm text-brand-text focus:ring-2 focus:ring-sky-500 outline-none transition-all"
+                  >
+                    <option value="all">{t('admin.allVisaTypes')}</option>
+                    {uniqueVisaTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <button 
+                  onClick={fetchOrders}
+                  aria-label="Refresh orders list"
+                  className="p-2 hover:bg-brand-surface rounded-xl transition-colors text-brand-muted border border-brand-border focus:ring-2 focus:ring-sky-500 outline-none"
+                >
+                  <RefreshCw className={cn("w-5 h-5", loading && "animate-spin")} aria-hidden="true" />
+                </button>
+              </div>
             </div>
-            <button 
-              onClick={fetchOrders}
-              className="p-2 hover:bg-brand-surface rounded-lg transition-colors text-brand-muted"
-            >
-              <RefreshCw className={cn("w-5 h-5", loading && "animate-spin")} />
-            </button>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-brand-surface/50">
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">Date</th>
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">Applicant</th>
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">Visa Type</th>
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">Amount</th>
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">Status</th>
-                  <th className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">Actions</th>
+                  <th scope="col" className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">{t('admin.table.date')}</th>
+                  <th scope="col" className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">{t('admin.table.applicant')}</th>
+                  <th scope="col" className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">{t('admin.table.visaType')}</th>
+                  <th scope="col" className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">{t('admin.table.amount')}</th>
+                  <th scope="col" className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">{t('admin.table.status')}</th>
+                  <th scope="col" className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">{t('admin.table.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-border">
-                {orders.length === 0 && !loading ? (
+                {filteredOrders.length === 0 && !loading ? (
                   <tr>
                     <td colSpan={6} className="p-20 text-center text-brand-muted font-medium">
-                      No orders found in the system.
+                      {orders.length === 0 ? t('admin.noOrders') : t('admin.noMatches')}
                     </td>
                   </tr>
                 ) : (
-                  orders.map((order) => (
+                  filteredOrders.map((order) => (
                     <React.Fragment key={order.id}>
                       <tr className={cn(
                         "hover:bg-brand-surface/30 transition-colors cursor-pointer",
@@ -169,7 +267,7 @@ export default function AdminDashboard() {
                           <div className="flex items-center gap-3">
                             <Calendar className="w-4 h-4 text-brand-muted" />
                             <span className="text-sm font-bold text-brand-text">
-                              {new Date(order.created_at).toLocaleDateString()}
+                              {new Date(order.created_at).toLocaleString()}
                             </span>
                           </div>
                         </td>
@@ -201,15 +299,18 @@ export default function AdminDashboard() {
                             order.status === 'completed' && "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
                             order.status === 'cancelled' && "bg-red-500/10 text-red-500 border-red-500/20"
                           )}>
-                            {order.status}
+                            {t(`admin.status.${order.status}`)}
                           </span>
                         </td>
                         <td className="p-6">
                           <button 
                             onClick={() => setSelectedOrder(selectedOrder === order.id ? null : order.id)}
-                            className="p-2 hover:bg-brand-surface rounded-lg transition-colors text-brand-muted"
+                            aria-label={selectedOrder === order.id ? "Collapse order details" : "Expand order details"}
+                            aria-expanded={selectedOrder === order.id}
+                            aria-controls={`order-details-${order.id}`}
+                            className="p-2 hover:bg-brand-surface rounded-lg transition-colors text-brand-muted focus:ring-2 focus:ring-sky-500 outline-none"
                           >
-                            <ChevronDown className={cn("w-5 h-5 transition-transform", selectedOrder === order.id && "rotate-180")} />
+                            <ChevronDown className={cn("w-5 h-5 transition-transform", selectedOrder === order.id && "rotate-180")} aria-hidden="true" />
                           </button>
                         </td>
                       </tr>
@@ -224,19 +325,19 @@ export default function AdminDashboard() {
                                 className="overflow-hidden bg-brand-surface/20 border-b border-brand-border"
                               >
                                 <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-12">
-                                  <div className="space-y-6">
+                                  <div className="space-y-6" id={`order-details-${order.id}`}>
                                     <h4 className="text-xs font-black uppercase tracking-widest text-sky-500 flex items-center gap-2">
-                                      <FileText className="w-4 h-4" />
-                                      Passport Details
+                                      <FileText className="w-4 h-4" aria-hidden="true" />
+                                      {t('admin.details.passport')}
                                     </h4>
                                     <div className="grid grid-cols-2 gap-6">
                                       {[
-                                        { label: 'Full Name', value: order.passport_data.fullName },
-                                        { label: 'Passport No.', value: order.passport_data.passportNumber },
-                                        { label: 'Nationality', value: order.passport_data.nationality },
-                                        { label: 'DOB', value: order.passport_data.dateOfBirth },
-                                        { label: 'Issue Date', value: order.passport_data.dateOfIssue },
-                                        { label: 'Expiry Date', value: order.passport_data.dateOfExpiry },
+                                        { label: t('ocr.details.fullName'), value: order.passport_data.fullName },
+                                        { label: t('ocr.details.passportNumber'), value: order.passport_data.passportNumber },
+                                        { label: t('ocr.details.nationality'), value: order.passport_data.nationality },
+                                        { label: t('ocr.details.dob'), value: order.passport_data.dateOfBirth },
+                                        { label: t('ocr.details.issueDate'), value: order.passport_data.dateOfIssue },
+                                        { label: t('ocr.details.expiryDate'), value: order.passport_data.dateOfExpiry },
                                       ].map((item) => (
                                         <div key={item.label}>
                                           <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest mb-1">{item.label}</p>
@@ -247,27 +348,60 @@ export default function AdminDashboard() {
                                   </div>
                                   <div className="space-y-6">
                                     <h4 className="text-xs font-black uppercase tracking-widest text-sky-500 flex items-center gap-2">
-                                      <CreditCard className="w-4 h-4" />
-                                      Order Summary
+                                      <CreditCard className="w-4 h-4" aria-hidden="true" />
+                                      {t('admin.details.orderSummary')}
                                     </h4>
                                     <div className="bg-brand-surface/50 border border-brand-border rounded-2xl p-6 space-y-4">
                                       <div className="flex justify-between text-sm">
-                                        <span className="text-brand-muted font-medium">Government Fee</span>
+                                        <span className="text-brand-muted font-medium">{t('admin.details.govFee')}</span>
                                         <span className="text-brand-text font-bold">{formatCurrency(order.government_fee, order.currency)}</span>
                                       </div>
                                       <div className="flex justify-between text-sm">
-                                        <span className="text-brand-muted font-medium">Service Fee</span>
+                                        <span className="text-brand-muted font-medium">{t('admin.details.serviceFee')}</span>
                                         <span className="text-brand-text font-bold">{formatCurrency(order.service_fee, order.currency)}</span>
                                       </div>
                                       <div className="flex justify-between text-sm">
-                                        <span className="text-brand-muted font-medium">Processing Fee</span>
+                                        <span className="text-brand-muted font-medium">{t('admin.details.processingFee')}</span>
                                         <span className="text-brand-text font-bold">{formatCurrency(order.processing_fee, order.currency)}</span>
                                       </div>
                                       <div className="pt-4 border-t border-brand-border flex justify-between items-end">
-                                        <span className="text-xs font-black uppercase tracking-widest text-brand-muted">Total Paid</span>
+                                        <span className="text-xs font-black uppercase tracking-widest text-brand-muted">{t('admin.details.totalPaid')}</span>
                                         <span className="text-2xl font-black text-brand-text">{formatCurrency(order.total_fee, order.currency)}</span>
                                       </div>
                                     </div>
+
+                                  <div className="space-y-6">
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-brand-muted">{t('admin.details.updateStatus')}</h4>
+                                    <div className="flex flex-wrap gap-2" role="group" aria-label="Order status update options">
+                                      {(['pending', 'processing', 'completed', 'cancelled'] as Order['status'][]).map((status) => (
+                                        <button
+                                          key={status}
+                                          disabled={
+                                            updatingStatus === order.id || 
+                                            order.status === status || 
+                                            order.status === 'completed' || 
+                                            order.status === 'cancelled'
+                                          }
+                                          onClick={() => handleStatusUpdate(order.id, status)}
+                                          aria-label={`Update status to ${status}`}
+                                          className={cn(
+                                            "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all focus:ring-2 focus:ring-sky-500 outline-none",
+                                            order.status === status 
+                                              ? "bg-brand-text text-brand-surface border-brand-text" 
+                                              : "bg-brand-surface text-brand-muted border-brand-border hover:border-sky-500 hover:text-sky-500",
+                                            (updatingStatus === order.id || (order.status !== status && (order.status === 'completed' || order.status === 'cancelled'))) && "opacity-50 cursor-not-allowed"
+                                          )}
+                                        >
+                                          {t(`admin.status.${status}`)}
+                                        </button>
+                                      ))}
+                                    </div>
+                                    {updatingStatus === order.id && (
+                                      <p className="text-xs text-sky-500 animate-pulse font-bold" aria-live="polite">
+                                        {t('admin.details.updating')}
+                                      </p>
+                                    )}
+                                  </div>
                                   </div>
                                 </div>
                               </motion.div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Globe, MapPin, CreditCard, Clock, CheckCircle2, AlertCircle, ChevronRight, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Search, Globe, MapPin, CreditCard, Clock, CheckCircle2, AlertCircle, ChevronRight, Loader2, Info } from 'lucide-react';
 import { visaService } from '../services/visaService';
 import { Destination, Nationality, VisaLookupResult } from '../types';
 import { cn, formatCurrency } from '../lib/utils';
@@ -21,6 +22,7 @@ interface VisaLookupProps {
 }
 
 export default function VisaLookup({ onApply }: VisaLookupProps) {
+  const { t } = useTranslation();
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [nationalities, setNationalities] = useState<Nationality[]>([]);
   const [selectedDest, setSelectedDest] = useState<string>('');
@@ -90,10 +92,10 @@ export default function VisaLookup({ onApply }: VisaLookupProps) {
         className="text-center mb-16"
       >
         <h1 className="text-5xl md:text-6xl font-extrabold text-brand-text mb-6 tracking-tight">
-          Check Your <span className="gradient-text">eVisa Eligibility</span>
+          {t('visa.title').split('Eligibility')[0]} <span className="gradient-text">{t('visa.title').includes('Eligibility') ? 'Eligibility' : ''}</span>
         </h1>
         <p className="text-lg text-brand-muted max-w-2xl mx-auto font-medium">
-          The fastest way to verify electronic visa requirements and get instant pricing for your next global journey.
+          {t('visa.subtitle')}
         </p>
       </motion.div>
 
@@ -108,7 +110,7 @@ export default function VisaLookup({ onApply }: VisaLookupProps) {
           <div className="space-y-3">
             <label className="text-xs font-bold text-brand-muted uppercase tracking-widest flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5 text-sky-400" />
-              Destination
+              {t('visa.destination')}
             </label>
             <div className="relative">
               <select
@@ -117,7 +119,7 @@ export default function VisaLookup({ onApply }: VisaLookupProps) {
                 className="w-full bg-brand-surface/50 border border-brand-border rounded-2xl px-5 py-4 text-brand-text focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all appearance-none cursor-pointer hover:bg-brand-surface/80"
                 required
               >
-                <option value="" className="bg-brand-surface">Select destination</option>
+                <option value="" className="bg-brand-surface">{t('visa.destination')}</option>
                 {destinations.map((d) => (
                   <option key={d.id} value={d.id} className="bg-brand-surface">{d.name}</option>
                 ))}
@@ -131,7 +133,7 @@ export default function VisaLookup({ onApply }: VisaLookupProps) {
           <div className="space-y-3">
             <label className="text-xs font-bold text-brand-muted uppercase tracking-widest flex items-center gap-2">
               <Globe className="w-3.5 h-3.5 text-indigo-400" />
-              Nationality
+              {t('visa.passport_origin')}
             </label>
             <div className="relative">
               <select
@@ -140,7 +142,7 @@ export default function VisaLookup({ onApply }: VisaLookupProps) {
                 className="w-full bg-brand-surface/50 border border-brand-border rounded-2xl px-5 py-4 text-brand-text focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all appearance-none cursor-pointer hover:bg-brand-surface/80"
                 required
               >
-                <option value="" className="bg-brand-surface">Select nationality</option>
+                <option value="" className="bg-brand-surface">{t('visa.passport_origin')}</option>
                 {nationalities.map((n) => (
                   <option key={n.id} value={n.id} className="bg-brand-surface">{n.name}</option>
                 ))}
@@ -164,7 +166,7 @@ export default function VisaLookup({ onApply }: VisaLookupProps) {
             ) : (
               <>
                 <Search className="w-5 h-5" />
-                Check Visa
+                {t('visa.check_button')}
               </>
             )}
           </button>
@@ -189,15 +191,31 @@ export default function VisaLookup({ onApply }: VisaLookupProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="text-center py-20 glass-card rounded-[2rem] border-2 border-dashed border-brand-border"
+            className="text-center py-16 glass-card rounded-[2.5rem] border-2 border-dashed border-brand-border overflow-hidden relative"
           >
-            <div className="w-20 h-20 bg-brand-surface/50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <AlertCircle className="w-10 h-10 text-brand-muted" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-red-500/50" />
+            <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="w-10 h-10 text-red-500" />
             </div>
-            <h3 className="text-2xl font-bold text-brand-text mb-3">Not Eligible</h3>
-            <p className="text-brand-muted max-w-md mx-auto">
-              Sorry, citizens of your nationality are not currently eligible for an eVisa to this destination.
+            <h3 className="text-3xl font-black text-brand-text mb-4">{t('visa.not_eligible')}</h3>
+            <p className="text-brand-muted max-w-md mx-auto mb-8 font-medium">
+              {t('visa.not_eligible_desc')}
             </p>
+            
+            <div className="max-w-lg mx-auto bg-brand-surface/50 p-8 rounded-3xl border border-brand-border text-left">
+              <h4 className="text-xs font-black uppercase tracking-widest text-brand-muted mb-4 flex items-center gap-2">
+                <Info className="w-4 h-4 text-sky-500" />
+                {t('visa.not_eligible_tips')}
+              </h4>
+              <ul className="space-y-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-brand-text font-medium">
+                    <div className="w-1.5 h-1.5 rounded-full bg-sky-500 mt-1.5 shrink-0" />
+                    {t(`visa.tip_${i}`)}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </motion.div>
         )}
 

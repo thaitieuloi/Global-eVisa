@@ -24,5 +24,14 @@ export const orderService = {
     
     if (error) throw error;
     return data || [];
+  },
+
+  async updateOrderStatus(orderId: string, status: Order['status']): Promise<void> {
+    const { error } = await supabase
+      .from('visa_orders')
+      .update({ status })
+      .eq('id', orderId);
+    
+    if (error) throw error;
   }
 };

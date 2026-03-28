@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { Globe, Shield, Zap, Search, FileText, Sun, Moon, Menu, X, LayoutDashboard } from 'lucide-react';
 import VisaLookup from './components/VisaLookup';
 import PassportOCR from './components/PassportOCR';
 import AdminDashboard from './components/AdminDashboard';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import { cn } from './lib/utils';
 
 type View = 'lookup' | 'ocr' | 'admin';
 
 export default function App() {
+  const { t } = useTranslation();
   const [view, setView] = useState<View>('lookup');
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -72,7 +75,7 @@ export default function App() {
               )}
             >
               <Search className="w-4 h-4" />
-              Visa Lookup
+              {t('admin.search')}
             </button>
             <button 
               onClick={() => setView('ocr')}
@@ -82,7 +85,7 @@ export default function App() {
               )}
             >
               <FileText className="w-4 h-4" />
-              Passport OCR
+              {t('ocr.title')}
             </button>
             <button 
               onClick={() => setView('admin')}
@@ -92,9 +95,10 @@ export default function App() {
               )}
             >
               <LayoutDashboard className="w-4 h-4" />
-              Admin
+              {t('admin.dashboard')}
             </button>
             <div className="h-6 w-px bg-brand-border mx-2" />
+            <LanguageSwitcher />
             <button 
               onClick={toggleTheme}
               className="w-10 h-10 rounded-xl bg-brand-surface border border-brand-border flex items-center justify-center text-brand-text hover:bg-brand-surface/80 transition-all"
