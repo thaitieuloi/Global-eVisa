@@ -81,5 +81,6 @@ export interface Order {
   processing_fee: number;
   currency: string;
   passport_data: PassportData;
+  passport_image_url?: string;
   status: 'pending' | 'processing' | 'completed' | 'cancelled';
 }

@@ -75,6 +75,7 @@ CREATE TABLE visa_orders (
     processing_fee DECIMAL(10,2) NOT NULL DEFAULT 0,
     currency VARCHAR(3) NOT NULL,
     passport_data JSONB NOT NULL,
+    passport_image_url VARCHAR(255),
     status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'processing', 'completed', 'cancelled'
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

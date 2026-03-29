@@ -8,6 +8,7 @@ import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { cn } from '../lib/utils';
 import { PassportData, VisaLookupResult } from '../types';
 import { orderService } from '../services/orderService';
+import { storageService } from '../services/storageService';
 
 interface PassportOCRProps {
   selectedVisa?: {
@@ -28,6 +29,7 @@ interface PassportOCRProps {
 export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRProps) {
   const { t } = useTranslation();
   const [image, setImage] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [result, setResult] = useState<PassportData | null>(null);
@@ -39,6 +41,7 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImage(reader.result as string);
@@ -120,12 +123,13 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
   };
 
   const handleRegister = async () => {
-    if (!result || !selectedVisa) return;
+    if (!result || !selectedVisa || !file) return;
 
     setRegistering(true);
     setError(null);
 
     try {
+      const imageUrl = await storageService.uploadPassportImage(file);
       await orderService.createOrder({
         visa_id: selectedVisa.visa_id,
         visa_name: selectedVisa.visa_name,
@@ -136,7 +140,8 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
         service_fee: selectedVisa.service_fee,
         processing_fee: selectedVisa.processing_fee,
         currency: selectedVisa.currency,
-        passport_data: result
+        passport_data: result,
+        passport_image_url: imageUrl
       });
       setSuccess(true);
       if (onComplete) {

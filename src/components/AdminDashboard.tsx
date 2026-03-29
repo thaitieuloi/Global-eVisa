@@ -342,6 +342,16 @@ export default function AdminDashboard() {
                                       <FileText className="w-4 h-4" aria-hidden="true" />
                                       {t('admin.details.passport')}
                                     </h4>
+                                    {order.passport_image_url && (
+                                      <div className="mb-4">
+                                        <img 
+                                          src={order.passport_image_url} 
+                                          alt="Passport" 
+                                          className="w-full h-auto rounded-2xl border border-brand-border"
+                                          referrerPolicy="no-referrer"
+                                        />
+                                      </div>
+                                    )}
                                     <div className="grid grid-cols-2 gap-6">
                                       {[
                                         { label: t('ocr.full_name'), value: order.passport_data.fullName },
