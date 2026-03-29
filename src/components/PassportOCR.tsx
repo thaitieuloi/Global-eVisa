@@ -10,6 +10,7 @@ import { PassportData, VisaLookupResult } from '../types';
 import { orderService } from '../services/orderService';
 import { storageService } from '../services/storageService';
 import { preprocessImage } from '../lib/imageUtils';
+import MermaidDiagram from './MermaidDiagram';
 
 interface PassportOCRProps {
   selectedVisa?: {
@@ -225,6 +226,19 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
       <div className="text-center mb-10">
         <h2 className="text-4xl font-black text-brand-text mb-4">{t('ocr.title')}</h2>
         <p className="text-brand-muted">{t('ocr.subtitle')}</p>
+        
+        {/* Architecture Diagram */}
+        <div className="mt-12 glass-card p-6 rounded-3xl max-w-3xl mx-auto border border-brand-border">
+          <h4 className="text-sm font-black uppercase tracking-widest text-brand-text mb-4">System Architecture</h4>
+          <MermaidDiagram chart={`
+graph TD
+    A[Người dùng] -->|Tải ảnh hộ chiếu| B(Frontend UI - React)
+    B -->|Tiền xử lý/Nén ảnh| C[Image Processor]
+    C -->|Gửi ảnh đã nén| D[Gemini API - OCR/Extraction]
+    D -->|Trả về JSON có cấu trúc| B
+    B -->|Hiển thị thông tin| A
+          `} />
+        </div>
         
         {selectedVisa && (
           <div className="mt-8 max-w-2xl mx-auto">
