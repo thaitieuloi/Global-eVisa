@@ -201,21 +201,6 @@ export default function VisaLookup({ onApply }: VisaLookupProps) {
             <p className="text-brand-muted max-w-md mx-auto mb-8 font-medium">
               {t('visa.not_eligible_desc')}
             </p>
-            
-            <div className="max-w-lg mx-auto bg-brand-surface/50 p-8 rounded-3xl border border-brand-border text-left">
-              <h4 className="text-xs font-black uppercase tracking-widest text-brand-muted mb-4 flex items-center gap-2">
-                <Info className="w-4 h-4 text-sky-500" />
-                {t('visa.not_eligible_tips')}
-              </h4>
-              <ul className="space-y-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-brand-text font-medium">
-                    <div className="w-1.5 h-1.5 rounded-full bg-sky-500 mt-1.5 shrink-0" />
-                    {t(`visa.tip_${i}`)}
-                  </li>
-                ))}
-              </ul>
-            </div>
           </motion.div>
         )}
 

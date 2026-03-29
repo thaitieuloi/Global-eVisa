@@ -353,7 +353,7 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
             </motion.div>
           )}
 
-          {result && result.fullName && (
+          {result && result.fullName && selectedVisa && (
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
