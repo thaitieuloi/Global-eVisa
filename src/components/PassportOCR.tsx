@@ -100,18 +100,23 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
         Use "" if not found. No extra text.
       `;
 
-      const response = await ai.models.generateContent({
-        model: model,
-        contents: {
-          parts: [
-            { text: prompt },
-            { inlineData: { mimeType: "image/jpeg", data: base64Data } }
-          ]
-        },
-        config: {
-          responseMimeType: "application/json"
-        }
-      });
+      const timeout = (ms: number) => new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms));
+
+      const response = await Promise.race([
+        ai.models.generateContent({
+          model: model,
+          contents: {
+            parts: [
+              { text: prompt },
+              { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+            ]
+          },
+          config: {
+            responseMimeType: "application/json"
+          }
+        }),
+        timeout(30000) // 30 seconds timeout
+      ]) as any;
 
       const text = response.text;
       if (text) {
@@ -135,6 +140,8 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
         setError('Gemini API Key is invalid. Please check your environment configuration.');
       } else if (err.message?.includes('SAFETY')) {
         setError('The image was flagged by safety filters. Please ensure you are uploading a standard passport image.');
+      } else if (err.message?.includes('Timeout')) {
+        setError('The scanning process timed out. Please try again with a smaller or clearer image.');
       } else {
         setError('An unexpected error occurred during scanning. Please check your internet connection and try again.');
       }
