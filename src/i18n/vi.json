@@ -69,16 +69,56 @@
   },
   "admin": {
     "dashboard": "Bảng điều khiển Admin",
-    "orders_title": "Đơn xin Visa",
-    "search_placeholder": "Tìm theo tên, loại visa hoặc trạng thái...",
-    "filter_status": "Lọc theo trạng thái",
-    "applicant": "Người nộp đơn",
-    "visa_type": "Loại Visa",
-    "fees": "Phí",
-    "created_at": "Ngày tạo",
-    "update_status": "Cập nhật trạng thái",
-    "no_orders": "Không tìm thấy đơn hàng nào phù hợp.",
+    "loginTitle": "Đăng nhập Admin",
+    "loginSubtitle": "Vui lòng nhập thông tin để truy cập bảng điều khiển",
+    "username": "Tên đăng nhập",
+    "password": "Mật khẩu",
+    "loginButton": "Đăng nhập",
+    "loggingIn": "Đang đăng nhập...",
+    "dashboardTitle": "Bảng điều khiển Admin",
+    "dashboardSubtitle": "Quản lý và theo dõi các đơn xin visa",
     "logout": "Đăng xuất",
-    "refresh": "Làm mới dữ liệu"
+    "recentOrders": "Đơn hàng gần đây",
+    "searchPlaceholder": "Tìm theo tên, loại visa hoặc trạng thái...",
+    "allStatuses": "Tất cả trạng thái",
+    "allVisaTypes": "Tất cả loại Visa",
+    "noOrders": "Chưa có đơn hàng nào.",
+    "noMatches": "Không tìm thấy đơn hàng nào phù hợp.",
+    "refreshData": "Làm mới dữ liệu",
+    "aria": {
+      "logout": "Đăng xuất khỏi Bảng điều khiển Admin",
+      "search": "Tìm kiếm đơn hàng theo người nộp đơn hoặc visa",
+      "filterStatus": "Lọc theo trạng thái",
+      "filterVisa": "Lọc theo loại visa"
+    },
+    "status": {
+      "pending": "Chờ xử lý",
+      "processing": "Đang xử lý",
+      "completed": "Hoàn thành",
+      "cancelled": "Đã hủy"
+    },
+    "table": {
+      "date": "Ngày",
+      "applicant": "Người nộp đơn",
+      "visaType": "Loại Visa",
+      "amount": "Số tiền",
+      "status": "Trạng thái",
+      "actions": "Hành động"
+    },
+    "details": {
+      "passport": "Chi tiết hộ chiếu",
+      "orderSummary": "Tóm tắt đơn hàng",
+      "govFee": "Lệ phí chính phủ",
+      "serviceFee": "Phí dịch vụ",
+      "processingFee": "Phí xử lý",
+      "totalPaid": "Tổng cộng",
+      "updateStatus": "Cập nhật trạng thái",
+      "updating": "Đang cập nhật..."
+    },
+    "errors": {
+      "invalidCredentials": "Thông tin đăng nhập không hợp lệ. Vui lòng sử dụng admin/123456",
+      "loadFailed": "Không thể tải đơn hàng từ cơ sở dữ liệu.",
+      "updateFailed": "Không thể cập nhật trạng thái đơn hàng."
+    }
   }
 }

@@ -431,8 +431,8 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
               <div key={field.key} className="space-y-1.5">
                 <label className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">{field.label}</label>
                 <div className={cn(
-                  "w-full bg-brand-surface/50 border border-brand-border rounded-xl px-4 py-3 text-brand-text min-h-[48px] flex items-center font-bold transition-all",
-                  !field.value && "text-brand-muted/30 italic font-normal text-sm bg-brand-surface/20"
+                  "w-full bg-brand-surface border border-brand-border rounded-xl px-4 py-3 text-brand-text min-h-[48px] flex items-center font-bold transition-all shadow-sm",
+                  !field.value && "text-brand-muted/30 italic font-normal text-sm bg-brand-surface/20 shadow-none"
                 )}>
                   {field.value || (loading ? t('ocr.extracting') : t('ocr.pending'))}
                 </div>

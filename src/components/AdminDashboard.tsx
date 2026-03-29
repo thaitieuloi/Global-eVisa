@@ -8,9 +8,11 @@ import { cn, formatCurrency } from '../lib/utils';
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('admin_auth') === 'true';
+  });
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('123456');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,14 +21,23 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [visaTypeFilter, setVisaTypeFilter] = useState<string>('all');
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  useEffect(() => {
+    if (isAuthenticated && isInitialLoad) {
+      fetchOrders();
+      setIsInitialLoad(false);
+    }
+  }, [isAuthenticated, isInitialLoad]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (username === 'admin' && password === '123456') {
       setIsAuthenticated(true);
+      localStorage.setItem('admin_auth', 'true');
       fetchOrders();
     } else {
-      setError('Invalid credentials. Please use admin/123456');
+      setError(t('admin.errors.invalidCredentials'));
     }
   };
 
@@ -37,7 +48,7 @@ export default function AdminDashboard() {
       setOrders(data);
     } catch (err) {
       console.error('Failed to fetch orders:', err);
-      setError('Failed to load orders from the database.');
+      setError(t('admin.errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -45,8 +56,9 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    setUsername('');
-    setPassword('');
+    localStorage.removeItem('admin_auth');
+    setUsername('admin');
+    setPassword('123456');
     setOrders([]);
     setSearchQuery('');
     setStatusFilter('all');
@@ -62,7 +74,7 @@ export default function AdminDashboard() {
       ));
     } catch (err) {
       console.error('Failed to update status:', err);
-      setError('Failed to update order status.');
+      setError(t('admin.errors.updateFailed'));
     } finally {
       setUpdatingStatus(null);
     }
@@ -164,7 +176,7 @@ export default function AdminDashboard() {
         </div>
         <button
           onClick={handleLogout}
-          aria-label="Logout from Admin Dashboard"
+          aria-label={t('admin.aria.logout')}
           className="flex items-center gap-2 px-6 py-3 bg-brand-surface border border-brand-border rounded-xl text-brand-muted font-bold hover:text-red-500 hover:border-red-500/30 transition-all focus:ring-2 focus:ring-red-500 outline-none"
         >
           <LogOut className="w-4 h-4" aria-hidden="true" />
@@ -181,9 +193,9 @@ export default function AdminDashboard() {
                 <h3 className="text-xl font-bold text-brand-text">{t('admin.recentOrders')}</h3>
               </div>
               
-              <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto" role="search" aria-label="Order filters">
+              <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto" role="search" aria-label={t('admin.aria.search')}>
                 <div className="relative flex-1 min-w-[200px]">
-                  <label htmlFor="search-orders" className="sr-only">Search orders by applicant or visa</label>
+                  <label htmlFor="search-orders" className="sr-only">{t('admin.aria.search')}</label>
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" aria-hidden="true" />
                   <input
                     id="search-orders"
@@ -196,7 +208,7 @@ export default function AdminDashboard() {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <label htmlFor="status-filter" className="sr-only">Filter by status</label>
+                  <label htmlFor="status-filter" className="sr-only">{t('admin.aria.filterStatus')}</label>
                   <select
                     id="status-filter"
                     value={statusFilter}
@@ -212,7 +224,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <label htmlFor="visa-filter" className="sr-only">Filter by visa type</label>
+                  <label htmlFor="visa-filter" className="sr-only">{t('admin.aria.filterVisa')}</label>
                   <select
                     id="visa-filter"
                     value={visaTypeFilter}
@@ -228,7 +240,7 @@ export default function AdminDashboard() {
 
                 <button 
                   onClick={fetchOrders}
-                  aria-label="Refresh orders list"
+                  aria-label={t('admin.refreshData')}
                   className="p-2 hover:bg-brand-surface rounded-xl transition-colors text-brand-muted border border-brand-border focus:ring-2 focus:ring-sky-500 outline-none"
                 >
                   <RefreshCw className={cn("w-5 h-5", loading && "animate-spin")} aria-hidden="true" />
@@ -332,12 +344,12 @@ export default function AdminDashboard() {
                                     </h4>
                                     <div className="grid grid-cols-2 gap-6">
                                       {[
-                                        { label: t('ocr.details.fullName'), value: order.passport_data.fullName },
-                                        { label: t('ocr.details.passportNumber'), value: order.passport_data.passportNumber },
-                                        { label: t('ocr.details.nationality'), value: order.passport_data.nationality },
-                                        { label: t('ocr.details.dob'), value: order.passport_data.dateOfBirth },
-                                        { label: t('ocr.details.issueDate'), value: order.passport_data.dateOfIssue },
-                                        { label: t('ocr.details.expiryDate'), value: order.passport_data.dateOfExpiry },
+                                        { label: t('ocr.full_name'), value: order.passport_data.fullName },
+                                        { label: t('ocr.passport_number'), value: order.passport_data.passportNumber },
+                                        { label: t('ocr.nationality'), value: order.passport_data.nationality },
+                                        { label: t('ocr.dob'), value: order.passport_data.dateOfBirth },
+                                        { label: t('ocr.doi'), value: order.passport_data.dateOfIssue },
+                                        { label: t('ocr.doe'), value: order.passport_data.dateOfExpiry },
                                       ].map((item) => (
                                         <div key={item.label}>
                                           <p className="text-[10px] font-bold text-brand-muted uppercase tracking-widest mb-1">{item.label}</p>

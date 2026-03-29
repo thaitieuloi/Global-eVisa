@@ -116,7 +116,7 @@ export default function VisaLookup({ onApply }: VisaLookupProps) {
               <select
                 value={selectedDest}
                 onChange={(e) => setSelectedDest(e.target.value)}
-                className="w-full bg-brand-surface/50 border border-brand-border rounded-2xl px-5 py-4 text-brand-text focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all appearance-none cursor-pointer hover:bg-brand-surface/80"
+                className="w-full bg-brand-surface border border-brand-border rounded-2xl px-5 py-4 text-brand-text focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all appearance-none cursor-pointer hover:bg-brand-surface/80 shadow-sm"
                 required
               >
                 <option value="" className="bg-brand-surface">{t('visa.destination')}</option>
@@ -139,7 +139,7 @@ export default function VisaLookup({ onApply }: VisaLookupProps) {
               <select
                 value={selectedNat}
                 onChange={(e) => setSelectedNat(e.target.value)}
-                className="w-full bg-brand-surface/50 border border-brand-border rounded-2xl px-5 py-4 text-brand-text focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all appearance-none cursor-pointer hover:bg-brand-surface/80"
+                className="w-full bg-brand-surface border border-brand-border rounded-2xl px-5 py-4 text-brand-text focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all appearance-none cursor-pointer hover:bg-brand-surface/80 shadow-sm"
                 required
               >
                 <option value="" className="bg-brand-surface">{t('visa.passport_origin')}</option>

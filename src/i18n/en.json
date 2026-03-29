@@ -69,16 +69,56 @@
   },
   "admin": {
     "dashboard": "Admin Dashboard",
-    "orders_title": "Visa Application Orders",
-    "search_placeholder": "Search by name, visa, or status...",
-    "filter_status": "Filter by Status",
-    "applicant": "Applicant",
-    "visa_type": "Visa Type",
-    "fees": "Fees",
-    "created_at": "Created At",
-    "update_status": "Update Status",
-    "no_orders": "No orders found matching your criteria.",
+    "loginTitle": "Admin Login",
+    "loginSubtitle": "Please enter your credentials to access the dashboard",
+    "username": "Username",
+    "password": "Password",
+    "loginButton": "Login",
+    "loggingIn": "Logging in...",
+    "dashboardTitle": "Admin Dashboard",
+    "dashboardSubtitle": "Manage and track visa applications",
     "logout": "Logout",
-    "refresh": "Refresh Data"
+    "recentOrders": "Recent Orders",
+    "searchPlaceholder": "Search by name, visa, or status...",
+    "allStatuses": "All Statuses",
+    "allVisaTypes": "All Visa Types",
+    "noOrders": "No orders found.",
+    "noMatches": "No orders found matching your criteria.",
+    "refreshData": "Refresh Data",
+    "aria": {
+      "logout": "Logout from Admin Dashboard",
+      "search": "Search orders by applicant or visa",
+      "filterStatus": "Filter by status",
+      "filterVisa": "Filter by visa type"
+    },
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "table": {
+      "date": "Date",
+      "applicant": "Applicant",
+      "visaType": "Visa Type",
+      "amount": "Amount",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "details": {
+      "passport": "Passport Details",
+      "orderSummary": "Order Summary",
+      "govFee": "Government Fee",
+      "serviceFee": "Service Fee",
+      "processingFee": "Processing Fee",
+      "totalPaid": "Total Paid",
+      "updateStatus": "Update Status",
+      "updating": "Updating..."
+    },
+    "errors": {
+      "invalidCredentials": "Invalid credentials. Please use admin/123456",
+      "loadFailed": "Failed to load orders from the database.",
+      "updateFailed": "Failed to update order status."
+    }
   }
 }

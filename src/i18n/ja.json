@@ -69,16 +69,56 @@
   },
   "admin": {
     "dashboard": "管理者ダッシュボード",
-    "orders_title": "ビザ申請注文",
-    "search_placeholder": "名前、ビザ、またはステータスで検索...",
-    "filter_status": "ステータスでフィルター",
-    "applicant": "申請者",
-    "visa_type": "ビザタイプ",
-    "fees": "料金",
-    "created_at": "作成日",
-    "update_status": "ステータスを更新",
-    "no_orders": "条件に一致する注文は見つかりませんでした。",
+    "loginTitle": "管理者ログイン",
+    "loginSubtitle": "ダッシュボードにアクセスするには、資格情報を入力してください",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "loginButton": "ログイン",
+    "loggingIn": "ログイン中...",
+    "dashboardTitle": "管理者ダッシュボード",
+    "dashboardSubtitle": "ビザ申請の管理と追跡",
     "logout": "ログアウト",
-    "refresh": "データを更新"
+    "recentOrders": "最近の注文",
+    "searchPlaceholder": "名前、ビザ、またはステータスで検索...",
+    "allStatuses": "すべてのステータス",
+    "allVisaTypes": "すべてのビザタイプ",
+    "noOrders": "注文が見つかりません。",
+    "noMatches": "条件に一致する注文は見つかりませんでした。",
+    "refreshData": "データを更新",
+    "aria": {
+      "logout": "管理者ダッシュボードからログアウト",
+      "search": "申請者またはビザで注文を検索",
+      "filterStatus": "ステータスでフィルター",
+      "filterVisa": "ビザタイプでフィルター"
+    },
+    "status": {
+      "pending": "保留中",
+      "processing": "処理中",
+      "completed": "完了",
+      "cancelled": "キャンセル済み"
+    },
+    "table": {
+      "date": "日付",
+      "applicant": "申請者",
+      "visaType": "ビザタイプ",
+      "amount": "金額",
+      "status": "ステータス",
+      "actions": "アクション"
+    },
+    "details": {
+      "passport": "パスポートの詳細",
+      "orderSummary": "注文概要",
+      "govFee": "政府手数料",
+      "serviceFee": "サービス料",
+      "processingFee": "処理手数料",
+      "totalPaid": "合計支払い額",
+      "updateStatus": "ステータスを更新",
+      "updating": "更新中..."
+    },
+    "errors": {
+      "invalidCredentials": "資格情報が無効です。admin/123456を使用してください",
+      "loadFailed": "データベースから注文を読み込めませんでした。",
+      "updateFailed": "注文ステータスの更新に失敗しました。"
+    }
   }
 }
