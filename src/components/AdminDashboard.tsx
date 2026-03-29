@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
-import { Lock, LogOut, LayoutDashboard, ListFilter, Search, User, FileText, Calendar, CreditCard, ChevronDown, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Lock, LogOut, LayoutDashboard, ListFilter, Search, User, FileText, Calendar, CreditCard, ChevronDown, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
 import { orderService } from '../services/orderService';
 import { Order } from '../types';
 import { cn, formatCurrency } from '../lib/utils';
@@ -22,6 +22,23 @@ export default function AdminDashboard() {
   const [visaTypeFilter, setVisaTypeFilter] = useState<string>('all');
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setPreviewImage(null);
+      }
+    };
+    
+    if (previewImage) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [previewImage]);
 
   useEffect(() => {
     if (isAuthenticated && isInitialLoad) {
@@ -347,8 +364,9 @@ export default function AdminDashboard() {
                                         <img 
                                           src={order.passport_image_url} 
                                           alt="Passport" 
-                                          className="w-full h-auto rounded-2xl border border-brand-border"
+                                          className="w-full h-auto rounded-2xl border border-brand-border cursor-pointer hover:opacity-90 transition-opacity"
                                           referrerPolicy="no-referrer"
+                                          onClick={() => setPreviewImage(order.passport_image_url)}
                                         />
                                       </div>
                                     )}
@@ -439,6 +457,34 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+      
+      {/* Preview Modal */}
+      <AnimatePresence>
+        {previewImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm"
+            onClick={() => setPreviewImage(null)}
+          >
+            <motion.img
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              src={previewImage}
+              alt="Passport Preview"
+              className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+            />
+            <button
+              className="absolute top-6 right-6 text-white/70 hover:text-white p-2"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X className="w-8 h-8" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
