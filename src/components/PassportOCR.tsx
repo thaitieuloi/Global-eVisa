@@ -9,6 +9,7 @@ import { cn } from '../lib/utils';
 import { PassportData, VisaLookupResult } from '../types';
 import { orderService } from '../services/orderService';
 import { storageService } from '../services/storageService';
+import { preprocessImage } from '../lib/imageUtils';
 
 interface PassportOCRProps {
   selectedVisa?: {
@@ -29,7 +30,9 @@ interface PassportOCRProps {
 export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRProps) {
   const { t } = useTranslation();
   const [image, setImage] = useState<string | null>(null);
+  const [preprocessedImage, setPreprocessedImage] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [result, setResult] = useState<PassportData | null>(null);
@@ -60,23 +63,25 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
     setResult(null);
 
     try {
+      // Preprocess image
+      const preprocessedImage = await preprocessImage(image);
+      setPreprocessedImage(preprocessedImage);
+      const base64Data = preprocessedImage.split(',')[1];
+
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
       const model = "gemini-3-flash-preview";
       
-      const base64Data = image.split(',')[1];
-      
       const prompt = `
-        Extract information from this passport image. 
-        Return ONLY a JSON object with the following fields:
-        - fullName: The full name of the person
-        - dateOfBirth: Date of birth in YYYY-MM-DD format
-        - passportNumber: The passport number
-        - nationality: The nationality
-        - dateOfIssue: Date of issue in YYYY-MM-DD format
-        - dateOfExpiry: Date of expiry in YYYY-MM-DD format
-        
-        If a field is not found, use an empty string.
-        Ensure the output is valid JSON.
+        Extract passport data. Return ONLY JSON:
+        {
+          "fullName": "...",
+          "dateOfBirth": "YYYY-MM-DD",
+          "passportNumber": "...",
+          "nationality": "...",
+          "dateOfIssue": "YYYY-MM-DD",
+          "dateOfExpiry": "YYYY-MM-DD"
+        }
+        Use "" if not found. No extra text.
       `;
 
       const response = await ai.models.generateContent({
@@ -98,8 +103,8 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
           const parsedData = JSON.parse(text) as PassportData;
           setResult(parsedData);
           
-          if (!parsedData.fullName) {
-            setError('Could not extract full name from the passport. Please ensure the photo is clear and try again.');
+          if (!parsedData.fullName || !parsedData.passportNumber) {
+            setError('Could not extract full name or passport number from the passport. Please ensure the photo is clear and try again.');
           }
         } catch (parseErr) {
           console.error('JSON Parsing Error:', parseErr, 'Raw text:', text);
@@ -157,6 +162,7 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
 
   const reset = () => {
     setImage(null);
+    setPreprocessedImage(null);
     setResult(null);
     setError(null);
     setSuccess(false);
@@ -238,18 +244,23 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
         {/* Upload Section */}
         <div className="space-y-6">
           <div 
-            onClick={() => !loading && !registering && fileInputRef.current?.click()}
+            onClick={!image ? () => !loading && !registering && fileInputRef.current?.click() : undefined}
             className={cn(
-              "relative aspect-[4/3] rounded-[2.5rem] border-2 border-dashed border-brand-border flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden group",
-              image ? "border-sky-500/50" : "hover:border-sky-500/30 hover:bg-brand-surface/30",
+              "relative aspect-[4/3] rounded-[2.5rem] border-2 border-dashed border-brand-border flex flex-col items-center justify-center transition-all overflow-hidden group",
+              image ? "border-sky-500/50" : "cursor-pointer hover:border-sky-500/30 hover:bg-brand-surface/30",
               (loading || registering) && "pointer-events-none opacity-70"
             )}
           >
             {image ? (
               <>
-                <img src={image} alt="Passport Preview" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <RefreshCw className="w-10 h-10 text-white" />
+                <img 
+                  src={image} 
+                  alt="Passport Preview" 
+                  className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={(e) => { e.stopPropagation(); e.preventDefault(); setPreviewImage(image); }}
+                />
+                <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                  <RefreshCw className="w-5 h-5 text-white" onClick={(e) => { e.stopPropagation(); e.preventDefault(); fileInputRef.current?.click(); }} />
                 </div>
               </>
             ) : (
@@ -269,6 +280,34 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
               className="hidden" 
             />
           </div>
+          
+          {/* Preview Modal */}
+          <AnimatePresence>
+            {previewImage && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm"
+                onClick={() => setPreviewImage(null)}
+              >
+                <motion.img
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0.9 }}
+                  src={previewImage}
+                  alt="Passport Preview"
+                  className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+                />
+                <button
+                  className="absolute top-6 right-6 text-white/70 hover:text-white p-2"
+                  onClick={() => setPreviewImage(null)}
+                >
+                  <X className="w-8 h-8" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="flex gap-4">
             <button
@@ -358,7 +397,7 @@ export default function PassportOCR({ selectedVisa, onComplete }: PassportOCRPro
             </motion.div>
           )}
 
-          {result && result.fullName && selectedVisa && (
+          {result && result.fullName && result.passportNumber && selectedVisa && !error && (
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
