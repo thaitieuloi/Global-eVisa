@@ -120,6 +120,11 @@
       "invalidCredentials": "Thông tin đăng nhập không hợp lệ. Vui lòng sử dụng admin/123456",
       "loadFailed": "Không thể tải đơn hàng từ cơ sở dữ liệu.",
       "updateFailed": "Không thể cập nhật trạng thái đơn hàng."
+    },
+    "pagination": {
+      "previous": "Trước",
+      "next": "Tiếp",
+      "page": "Trang {{current}} / {{total}}"
     }
   }
 }

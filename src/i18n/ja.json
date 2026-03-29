@@ -120,6 +120,11 @@
       "invalidCredentials": "資格情報が無効です。admin/123456を使用してください",
       "loadFailed": "データベースから注文を読み込めませんでした。",
       "updateFailed": "注文ステータスの更新に失敗しました。"
+    },
+    "pagination": {
+      "previous": "前へ",
+      "next": "次へ",
+      "page": "{{current}} / {{total}} ページ"
     }
   }
 }

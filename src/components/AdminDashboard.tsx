@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
-import { Lock, LogOut, LayoutDashboard, ListFilter, Search, User, FileText, Calendar, CreditCard, ChevronDown, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
+import { Lock, LogOut, LayoutDashboard, ListFilter, Search, User, FileText, Calendar, CreditCard, ChevronDown, ChevronUp, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
 import { orderService } from '../services/orderService';
 import { Order } from '../types';
 import { cn, formatCurrency } from '../lib/utils';
@@ -20,9 +20,17 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [visaTypeFilter, setVisaTypeFilter] = useState<string>('all');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 5;
+
+  useEffect(() => {
+    // Reset to first page when filters or search change
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, visaTypeFilter]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -107,9 +115,18 @@ export default function AdminDashboard() {
     const matchesVisaType = visaTypeFilter === 'all' || order.visa_code === visaTypeFilter;
 
     return matchesSearch && matchesStatus && matchesVisaType;
+  }).sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime();
+    const dateB = new Date(b.created_at).getTime();
+    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
 
   const uniqueVisaTypes = Array.from(new Set(orders.map(o => o.visa_code)));
+
+  const totalPages = Math.ceil(filteredOrders.length / recordsPerPage);
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  const currentRecords = filteredOrders.slice(indexOfFirstRecord, indexOfLastRecord);
 
   if (!isAuthenticated) {
     return (
@@ -270,7 +287,14 @@ export default function AdminDashboard() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-brand-surface/50">
-                  <th scope="col" className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">{t('admin.table.date')}</th>
+                  <th 
+                    scope="col" 
+                    className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border cursor-pointer hover:text-sky-500 transition-colors flex items-center gap-2"
+                    onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                  >
+                    {t('admin.table.date')}
+                    {sortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  </th>
                   <th scope="col" className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">{t('admin.table.applicant')}</th>
                   <th scope="col" className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">{t('admin.table.visaType')}</th>
                   <th scope="col" className="p-6 text-[10px] font-black uppercase tracking-widest text-brand-muted border-b border-brand-border">{t('admin.table.amount')}</th>
@@ -279,14 +303,14 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-border">
-                {filteredOrders.length === 0 && !loading ? (
+                {currentRecords.length === 0 && !loading ? (
                   <tr>
                     <td colSpan={6} className="p-20 text-center text-brand-muted font-medium">
                       {orders.length === 0 ? t('admin.noOrders') : t('admin.noMatches')}
                     </td>
                   </tr>
                 ) : (
-                  filteredOrders.map((order) => (
+                  currentRecords.map((order) => (
                     <React.Fragment key={order.id}>
                       <tr className={cn(
                         "hover:bg-brand-surface/30 transition-colors cursor-pointer",
@@ -455,6 +479,27 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
+          {totalPages > 1 && (
+            <div className="p-6 border-t border-brand-border flex items-center justify-between">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-brand-surface border border-brand-border rounded-xl text-sm font-bold text-brand-text hover:border-sky-500 transition-all disabled:opacity-50"
+              >
+                {t('admin.pagination.previous')}
+              </button>
+              <span className="text-sm font-bold text-brand-muted">
+                {t('admin.pagination.page', { current: currentPage, total: totalPages })}
+              </span>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-brand-surface border border-brand-border rounded-xl text-sm font-bold text-brand-text hover:border-sky-500 transition-all disabled:opacity-50"
+              >
+                {t('admin.pagination.next')}
+              </button>
+            </div>
+          )}
         </div>
       </div>
       

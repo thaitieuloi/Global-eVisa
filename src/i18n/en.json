@@ -120,6 +120,11 @@
       "invalidCredentials": "Invalid credentials. Please use admin/123456",
       "loadFailed": "Failed to load orders from the database.",
       "updateFailed": "Failed to update order status."
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {{current}} of {{total}}"
     }
   }
 }
